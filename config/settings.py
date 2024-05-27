@@ -29,6 +29,7 @@ else:
 # Application definition
 
 DJANGO_APPS = [
+    # DJANGO BASE APPS
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,12 +40,15 @@ DJANGO_APPS = [
 
 LOCAL_APPS = [
     'api.user.apps.UserConfig',
+    'api.chat.apps.ChatConfig',
     'api.logger.apps.LoggerConfig',
     'api.notification.apps.NotificationConfig',
 ]
 
 # OTHER LIBRARIES
 THIRD_PARTY_APPS = [
+    # CHAT
+    'channels',
     # DJANGO STORAGES FOR SERVER
     'storages',
     # filter
@@ -54,7 +58,7 @@ THIRD_PARTY_APPS = [
     'rest_framework.authtoken',
 ]
 
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
+INSTALLED_APPS = THIRD_PARTY_APPS + DJANGO_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -84,6 +88,16 @@ TEMPLATES = [
         },
     },
 ]
+
+# CHANNELS
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
 
 # DJANGO BASE USER MODEL
 SITE_ID = 1
