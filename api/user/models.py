@@ -1,7 +1,13 @@
 from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 from django.utils.translation import gettext_lazy as _
+from api.helpers import get_conversation_between
 from api.utils import FilenameChanger
+from django.utils import timezone
+from api.chat.models import Chat
+from django.db.models import Q
+from model_utils import Choices
 from django.db import models
+import uuid
 
 
 class UserManager(DjangoUserManager):
@@ -58,14 +64,64 @@ class User(AbstractUser):
 
 
 class Profile(models.Model):
+    GENDER_CHOICES = Choices(
+        ("M", "남성"),
+        ("W", "여성"),
+    )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=32, verbose_name=_('닉네임'), null=True, blank=True)
-    profile_image = models.ImageField(verbose_name=_('프로필 사진'), null=True, blank=True, upload_to=FilenameChanger('profile'))
     created_at = models.DateTimeField(verbose_name=_('생성 일자'), auto_now_add=True, null=True, blank=True)
     kind = models.CharField(max_length=32, verbose_name=_('종류'), null=True, blank=True)
     code = models.CharField(max_length=1024, verbose_name=_('SNS 고유 코드'), null=True, blank=True)
     points = models.PositiveIntegerField(default=0, verbose_name=_('포인트'))
     firebase_token = models.CharField(max_length=1024, verbose_name=_('파이어베이스 토큰'), null=True, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, verbose_name=_('위도'), null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, verbose_name=_('경도'), null=True, blank=True)
+    birthdate = models.DateField(null=True, blank=True, verbose_name=_('생일'))
+    age = models.PositiveIntegerField(null=True, blank=True, verbose_name=_('나이'))
+    nationality = models.TextField(max_length=20, null=True, verbose_name=_('국적'))
+    city = models.TextField(max_length=15, null=True, verbose_name=_('도시'))
+    gender = models.CharField(
+        choices=GENDER_CHOICES,
+        default=GENDER_CHOICES.M,
+        max_length=1,
+        null=False,
+        blank=False,
+        verbose_name=_('성별')
+    )
+    blocked_profiles = models.ManyToManyField(
+        "self", symmetrical=False, related_name="blocked_by", blank=True, verbose_name=_('차단한 프로필')
+    )
+    likes = models.ManyToManyField(
+        "self", symmetrical=False, related_name="liked_by", blank=True, verbose_name=_('좋아요한 프로필')
+    )
+
+    def block_profile(self, blocked_profile):
+        # Remove likes between
+        self.likes.remove(blocked_profile)
+        blocked_profile.likes.remove(self)
+
+        # Check for existing match between profiles and delete it
+        match_qs = Match.objects.filter(
+            Q(profile1=self, profile2=blocked_profile)
+            | Q(profile1=blocked_profile, profile2=self)
+        )
+        if match_qs.exists():
+            match_qs.delete()
+
+        # check is there is any conversation between and delete it
+        conversation = get_conversation_between(self, blocked_profile)
+        if conversation:
+            conversation.delete()
+
+        self.blocked_profiles.add(blocked_profile)
+
+    def delete(self, *args, **kwargs):
+        chats = Chat.objects.filter(user_set=self)
+        if chats.count() >= 1:
+            for chat in chats:
+                chat.delete()
+        super().delete()
 
     class Meta:
         verbose_name = '프로필'
@@ -73,6 +129,44 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.user.email + '의 프로필'
+
+
+class ProfileImage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name=_('uuid'))
+    profile = models.ForeignKey(Profile, default=None, on_delete=models.CASCADE, verbose_name=_('프로필'))
+    profile_image = models.ImageField(
+        verbose_name=_('프로필 사진'), null=True, blank=True, upload_to=FilenameChanger('profile')
+    )
+    created_at = models.DateTimeField(default=timezone.now, verbose_name=_('생성 시각'))
+
+    def delete(self, *args, **kwargs):
+        self.profile_image.delete(save=False)
+        super().delete()
+
+    class Meta:
+        verbose_name = '프로필 이미지'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.profile.nickname + '의 이미지'
+
+
+class Match(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name=_('uuid'))
+    profile1 = models.ForeignKey(
+        Profile, related_name="profile1_matches", default=None, on_delete=models.CASCADE, verbose_name=_('사용자1')
+    )
+    profile2 = models.ForeignKey(
+        Profile, related_name="profile2_matches", default=None, on_delete=models.CASCADE, verbose_name=_('사용자2')
+    )
+    created_at = models.DateTimeField(default=timezone.now, verbose_name=_('매칭 시각'))
+
+    class Meta:
+        verbose_name = '매칭'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.profile1.nickname + '과' + self.profile2.nickname + '의 매칭'
 
 
 class SocialKindChoices(models.TextChoices):

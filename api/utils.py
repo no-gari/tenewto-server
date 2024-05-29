@@ -4,6 +4,7 @@ import datetime
 import uuid
 import os
 
+
 @deconstructible
 class FilenameChanger(object):
     def __init__(self, base_path):

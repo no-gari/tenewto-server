@@ -1,42 +1,88 @@
-# Ready-To-Deploy Django, gunicorn, NGINX, Docker Application
-Getting a Django 4.2 app up in no time. In this project, gunicorn is used as a WSGI. NGINX is used as a reverse proxy server.
+## Django, Nginx, Docker-compose
+Django, Nginx, Docker-comose를 사용하여 배포하는 방법.
+기본적으로 public repository로 유지하고 서버에서 pull 받아서 docker-compose up -d 로 서버를 한 번에 구성한다.
 
-## Premise
-I have seen one too many Dockerfile with unreadable code. Many code base out there have Docker setup so elaborately that it is unmodifiable. Here, I try to simplify Dockerfile and Docker Compose file as much as possible, so that more than one developer in a team will understand how it works.
-
-## For Development
-In the root level of this repository, copy the file named `django.env.example` to `django.env` and adjust file variables
+## Development
+ec2 서버 superuser 비밀번호 세팅
 ```
-cp django.env.example django.env
+sudo passwd root
 ```
-
-Build code with docker compose
+설정 이후 루트 계정으로 쭉 운영하기 위해 슈퍼유저로 로그인
 ```
-docker-compose build
+su -
 ```
 
-Run the built container
+Linux 환경 업그레이드
 ```
-docker-compose up
+apt update
+
 ```
 
-## Deploy as a Simple Application
-Here is a script to install docker and docker-compose. After running these commands, exit from ssh and reconnect to the instance. This can be used in AWS Launch Config
+Docker 환경을 위해 패키지 설치
 ```
-#!/bin/bash
-sudo yum -y update
-sudo yum install -y docker
-sudo usermod -a -G docker $(whoami)
-sudo service docker start
-sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+apt install apt-transport-https 
+apt install ca-certificates
+apt install curl
+apt install software-properties-common
 ```
-For Ubuntu
+
+Curl 명령어로 Docker 다운로드
 ```
-sudo apt update
-sudo apt install -y docker.io
-sudo usermod -a -G docker $(whoami)
-sudo service docker start
-sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add
+```
+
+Repository에 경로 추가
+```
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+sudo apt-get update
+```
+
+Docker Engine 설치
+```
+apt-get install docker-ce docker-ce-cli containerd.io
+```
+
+Docker Compose 설치 (최신 버전으로 바꾸려면 버전 명만 변경)
+```
+curl -L "https://github.com/docker/compose/releases/download/2.5.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
+
+권한 부여
+```
+chmod +x /usr/local/bin/docker-compose
+```
+
+설치 여부 확인
+```
+docker -v
+docker-compose -v
+```
+
+.env.example 파일 바탕으로 .env 파일 생성 및 vi로 수정
+```
+cp .env.example .env
+vi .env
+```
+---
+
+## Docker 관련 명령어
+
+실행 중인 Docker 컨테이너 리스트 (-qa 제외하면 모든 컨테이너 리스트)
+```
+docker ps -qa
+```
+
+Docker 컨테이너 모두 삭제
+```
+docker rm -f $(docker ps -qa)
+```
+
+Docker 이미지 리스트
+```
+docker image ls -a
+```
+
+Docker 이미지 모두 삭제
+```
+docker rmi $(docker images -q)
 ```
