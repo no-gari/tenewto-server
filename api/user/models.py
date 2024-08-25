@@ -63,30 +63,76 @@ class User(AbstractUser):
         return hasattr(self, 'social')
 
 
+class Keyword(models.Model):
+    title = models.CharField(verbose_name=_('키워드'), max_length=16, null=True, blank=True)
+
+    class Meta:
+        verbose_name = '키워드'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.title
+
+
+class Hobby(models.Model):
+    title = models.CharField(verbose_name=_('취미'), max_length=16, null=True, blank=True)
+
+    class Meta:
+        verbose_name = '취미'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.title
+
+
 class Profile(models.Model):
     GENDER_CHOICES = Choices(
         ("M", "남성"),
         ("W", "여성"),
     )
+    RELIGION_CHOICES = Choices(
+        ('noreligion', '무교'),
+        ('christianity', '기독교'),
+        ('buddism', '불교'),
+        ('catholicism', '천주교'),
+        ('other', '기타'),
+        ('noshow', '밝히기 싫어'),
+    )
+    SMOKE_CHOICES = Choices(
+        ('no', '비흡연자'),
+        ('yes', '흡연자'),
+        ('electronic', '전자담배'),
+    )
+    SCHOOL_CHOICES = Choices(
+        ('a', '학사'),
+        ('d', '석사'),
+        ('e', '기타'),
+    )
+    JOB_CHOICES = Choices(
+        ('a', '학생'),
+        ('b', '직장인'),
+        ('c', '프리랜서/창업'),
+        ('d', '준비 중'),
+    )
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nickname = models.CharField(max_length=32, verbose_name=_('닉네임'), null=True, blank=True)
+    avatar = models.ImageField(verbose_name=_('아바타'), null=True, blank=True, upload_to=FilenameChanger('profile'))
     created_at = models.DateTimeField(verbose_name=_('생성 일자'), auto_now_add=True, null=True, blank=True)
     kind = models.CharField(max_length=32, verbose_name=_('종류'), null=True, blank=True)
     code = models.CharField(max_length=1024, verbose_name=_('SNS 고유 코드'), null=True, blank=True)
-    points = models.PositiveIntegerField(default=0, verbose_name=_('포인트'))
+    points = models.PositiveIntegerField(default=0, verbose_name=_('포인트'), null=True, blank=True)
     firebase_token = models.CharField(max_length=1024, verbose_name=_('파이어베이스 토큰'), null=True, blank=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, verbose_name=_('위도'), null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, verbose_name=_('경도'), null=True, blank=True)
     birthdate = models.DateField(null=True, blank=True, verbose_name=_('생일'))
     age = models.PositiveIntegerField(null=True, blank=True, verbose_name=_('나이'))
     nationality = models.TextField(max_length=20, null=True, verbose_name=_('국적'))
-    city = models.TextField(max_length=15, null=True, verbose_name=_('도시'))
+    city = models.TextField(max_length=15, null=True, blank=True, verbose_name=_('도시'))
     gender = models.CharField(
         choices=GENDER_CHOICES,
         default=GENDER_CHOICES.M,
         max_length=1,
-        null=False,
-        blank=False,
         verbose_name=_('성별')
     )
     blocked_profiles = models.ManyToManyField(
@@ -95,6 +141,16 @@ class Profile(models.Model):
     likes = models.ManyToManyField(
         "self", symmetrical=False, related_name="liked_by", blank=True, verbose_name=_('좋아요한 프로필')
     )
+    religion = models.CharField(max_length=32, choices=RELIGION_CHOICES, default='other', verbose_name=_('종교'))
+    smoke = models.CharField(max_length=32, choices=SMOKE_CHOICES, default='no', verbose_name=_('흡연 여부'))
+    height = models.IntegerField(verbose_name=_('키'), null=True, blank=True)
+    mbti = models.CharField(max_length=4, verbose_name=_('흡연 여부'), null=True, blank=True)
+    keywords = models.ManyToManyField(Keyword, verbose_name=_('키워드'), blank=True)
+    job = models.CharField(max_length=1, choices=JOB_CHOICES, verbose_name=_('직업'), null=True, blank=True)
+    job_detail = models.CharField(max_length=32, verbose_name=_('직장 명'), null=True, blank=True)
+    school_level = models.CharField(max_length=1, verbose_name=_('학력'), choices=SCHOOL_CHOICES, null=True, blank=True)
+    school_name = models.CharField(max_length=32, verbose_name=_('학교 이름'), null=True, blank=True)
+    school_major = models.CharField(max_length=32, verbose_name=_('학교 전공'), null=True, blank=True)
 
     def block_profile(self, blocked_profile):
         # Remove likes between
@@ -135,7 +191,7 @@ class ProfileImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name=_('uuid'))
     profile = models.ForeignKey(Profile, default=None, on_delete=models.CASCADE, verbose_name=_('프로필'))
     profile_image = models.ImageField(
-        verbose_name=_('프로필 사진'), null=True, blank=True, upload_to=FilenameChanger('profile')
+        verbose_name=_('프로필 이미지'), null=True, blank=True, upload_to=FilenameChanger('profile')
     )
     created_at = models.DateTimeField(default=timezone.now, verbose_name=_('생성 시각'))
 
@@ -166,7 +222,7 @@ class Match(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.profile1.nickname + '과' + self.profile2.nickname + '의 매칭'
+        return self.profile1.user.nickname + '과' + self.profile2.user.nickname + '의 매칭'
 
 
 class SocialKindChoices(models.TextChoices):

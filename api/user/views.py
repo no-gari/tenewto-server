@@ -2,16 +2,19 @@ from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from api.user.models import Profile
 
-from api.user.serializers import UserRegisterSerializer, PhoneVerifierCreateSerializer, ProfileSerializer ,\
-    PhoneVerifierConfirmSerializer, UserSocialLoginSerializer, UserDetailUpdateSerializer
+from api.user.serializers import ProfileSerializer, UserNicknameUpdateSerializer, UserSocialLoginSerializer
 
 
 class UserSocialLoginView(CreateAPIView):
     serializer_class = UserSocialLoginSerializer
 
 
-class UserRegisterView(CreateAPIView):
-    serializer_class = UserRegisterSerializer
+class UserDetailUpdateView(RetrieveUpdateAPIView):
+    serializer_class = UserNicknameUpdateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 
 class ProfileDetailUpdateView(RetrieveUpdateAPIView):
@@ -20,19 +23,3 @@ class ProfileDetailUpdateView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return Profile.objects.get(user=self.request.user)
-
-
-class UserDetailUpdateView(RetrieveUpdateAPIView):
-    serializer_class = UserDetailUpdateSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_object(self):
-        return self.request.user
-
-
-class PhoneVerifierCreateView(CreateAPIView):
-    serializer_class = PhoneVerifierCreateSerializer
-
-
-class PhoneVerifierConfirmView(CreateAPIView):
-    serializer_class = PhoneVerifierConfirmSerializer
