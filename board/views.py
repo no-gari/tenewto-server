@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from .forms import ApplyForm
+from django.views.decorators.csrf import csrf_exempt
+
 
 def home_view(request):
     return render(request, 'home.html')
@@ -9,6 +11,7 @@ def info(request):
     return render(request, 'info.html')
 
 
+@csrf_exempt
 def apply(request):
     if request.method == 'POST':
         form = ApplyForm(request.POST, request.FILES)
