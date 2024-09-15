@@ -1,0 +1,95 @@
+<!-- pages/templates/apply.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply for Photo Contest</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>공모전 참가 신청</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="name" class="form-label">성명</label>
+                {{ form.name }}
+            </div>
+
+            <div class="mb-3">
+                <label for="phone" class="form-label">휴대폰</label>
+                {{ form.phone }}
+            </div>
+
+            <div class="mb-3">
+                <label for="birthday" class="form-label">생년월일</label>
+                {{ form.birthday }}
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">이메일</label>
+                {{ form.email }}
+            </div>
+
+            <div class="mb-3">
+                <label for="art_name" class="form-label">작품 명</label>
+                {{ form.art_name }}
+            </div>
+
+            <!-- File Upload Fields -->
+            <div class="mb-3">
+                <label for="image1" class="form-label">작품 업로드</label>
+                {{ form.image1 }}
+            </div>
+
+            <div class="mb-3">
+                <label for="image2" class="form-label">작품 업로드</label>
+                {{ form.image2 }}
+            </div>
+
+            <div class="mb-3">
+                <label for="image3" class="form-label">작품 업로드</label>
+                {{ form.image3 }}
+            </div>
+
+            <div class="mb-3">
+                <label for="image4" class="form-label">작품 업로드</label>
+                {{ form.image4 }}
+            </div>
+
+            <div class="mb-3">
+                <label for="image5" class="form-label">작품 업로드</label>
+                {{ form.image5 }}
+            </div>
+
+            <div class="mb-3">
+                <label for="when" class="form-label">촬영 일시</label>
+                {{ form.when }}
+            </div>
+
+            <div class="mb-3">
+                <label for="where" class="form-label">촬영 장소</label>
+                {{ form.where }}
+            </div>
+
+            <div class="mb-3">
+                <label for="explanation" class="form-label">작품 설명</label>
+                {{ form.explanation }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="fixed">보정 내용</label>
+                {{ form.fixed }}
+            </div>
+
+            <button type="submit" class="btn btn-primary">제출하기</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

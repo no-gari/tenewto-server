@@ -43,6 +43,7 @@ LOCAL_APPS = [
     'api.chat.apps.ChatConfig',
     'api.logger.apps.LoggerConfig',
     'api.notification.apps.NotificationConfig',
+    'board',
 ]
 
 # OTHER LIBRARIES
