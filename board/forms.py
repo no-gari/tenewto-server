@@ -1,4 +1,3 @@
-# pages/forms.py
 from django import forms
 
 
@@ -17,3 +16,8 @@ class ApplyForm(forms.Form):
     where = forms.CharField(max_length=200, label='where', widget=forms.TextInput(attrs={'class': 'form-control'}), required=True)
     explanation = forms.CharField(label='explanation', widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}), required=True)
     fixed = forms.CharField(label='fixed', widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}), required=True)
+
+
+class CheckArtForm(forms.Form):
+    name = forms.CharField(max_length=100, label="이름", widget=forms.TextInput(attrs={'class': 'form-control'}))
+    phone = forms.CharField(max_length=20, label="전화번호", widget=forms.TextInput(attrs={'class': 'form-control'}))
