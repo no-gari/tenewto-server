@@ -1,3 +1,13 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import ApplyAvailable, Application
+
+
+@admin.register(ApplyAvailable)
+class ApplyAvailableAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Application)
+class ApplicationAdmin(admin.ModelAdmin):
+    pass

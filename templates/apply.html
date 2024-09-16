@@ -1,15 +1,16 @@
 <!-- pages/templates/apply.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apply for Photo Contest</title>
+    <title>사진 공모전 신청</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
+<div class="container mt-5">
+    {% if available %}
         <h1>공모전 참가 신청</h1>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
@@ -87,9 +88,12 @@
 
             <button type="submit" class="btn btn-dark">제출하기</button>
         </form>
-    </div>
+    {% else %}
+        <h1>공모전 참가 신청이 마감되었습니다.</h1>
+    {% endif %}
+</div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

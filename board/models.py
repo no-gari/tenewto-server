@@ -16,6 +16,19 @@ class Application(models.Model):
     where = models.CharField(max_length=200, verbose_name='촬영장소')
     explanation = models.TextField(verbose_name='설명')
     fixed = models.TextField(verbose_name='보정 내용')
+    applied_at = models.DateTimeField(verbose_name='제출 일시', auto_now_add=True, null=True, blank=True)
+
+    class Meta:
+        verbose_name = '공모전 지원 내역'
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return f'{self.name} - {self.art_name}'
+
+
+class ApplyAvailable(models.Model):
+    available = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = '지원 가능 여부'
+        verbose_name_plural = verbose_name

@@ -1,13 +1,10 @@
 from django.views.decorators.csrf import csrf_exempt
 from .forms import ApplyForm, CheckArtForm
 from django.shortcuts import render
-from .models import Application
+from .models import Application, ApplyAvailable
 
 
-def home_view(request):
-    return render(request, 'home.html')
-
-
+@csrf_exempt
 def info(request):
     result = None
     if request.method == 'POST':
@@ -53,14 +50,10 @@ def apply(request):
             return render(request, 'success.html', {'form': form})
     else:
         form = ApplyForm()
-
+        apply_available = ApplyAvailable.objects.first()
+        available = apply_available.available if apply_available else False
+        new_context = {
+            'available': available
+        }
+        return render(request, 'apply.html', {'form': form, **new_context})
     return render(request, 'apply.html', {'form': form})
-
-
-def check(request):
-    return render(request, 'check.html')
-
-
-def community(request):
-    return render(request, 'community.html')
-
