@@ -4,78 +4,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>사진 공모전 신청</title>
+    <title>공모전 응모 신청</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-5">
     {% if available %}
-        <h1>공모전 참가 신청</h1>
+        <h1>공모전 응모 신청</h1>
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <div class="mb-3">
-                <label for="name" class="form-label">성명</label>
-                {{ form.name }}
+            <!-- Two fields in one row -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="name" class="form-label">성명</label>
+                    {{ form.name }}
+                </div>
+                <div class="col-md-6">
+                    <label for="phone" class="form-label">휴대폰</label>
+                    {{ form.phone }}
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label for="phone" class="form-label">휴대폰</label>
-                {{ form.phone }}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="birthday" class="form-label">생년월일</label>
+                    {{ form.birthday }}
+                </div>
+                <div class="col-md-6">
+                    <label for="email" class="form-label">이메일</label>
+                    {{ form.email }}
+                </div>
             </div>
 
+            <!-- Full width field -->
             <div class="mb-3">
-                <label for="birthday" class="form-label">생년월일</label>
-                {{ form.birthday }}
+                <label for="application" class="form-label">참가 신청서</label>
+                {{ form.application }}
             </div>
 
-            <div class="mb-3">
-                <label for="email" class="form-label">이메일</label>
-                {{ form.email }}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="art_name1" class="form-label">작품1 제목</label>
+                    {{ form.art_name1 }}
+                </div>
+                <div class="col-md-6">
+                    <label for="image1" class="form-label">작품1 업로드</label>
+                    {{ form.image1 }}
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label for="art_name" class="form-label">작품 명</label>
-                {{ form.art_name }}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="art_name2" class="form-label">작품2 제목</label>
+                    {{ form.art_name2 }}
+                </div>
+                <div class="col-md-6">
+                    <label for="image2" class="form-label">작품2 업로드</label>
+                    {{ form.image2 }}
+                </div>
             </div>
 
-            <!-- File Upload Fields -->
-            <div class="mb-3">
-                <label for="image1" class="form-label">작품 업로드</label>
-                {{ form.image1 }}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="art_name3" class="form-label">작품3 제목</label>
+                    {{ form.art_name3 }}
+                </div>
+                <div class="col-md-6">
+                    <label for="image3" class="form-label">작품3 업로드</label>
+                    {{ form.image3 }}
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label for="image2" class="form-label">작품 업로드</label>
-                {{ form.image2 }}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="art_name4" class="form-label">작품4 제목</label>
+                    {{ form.art_name4 }}
+                </div>
+                <div class="col-md-6">
+                    <label for="image4" class="form-label">작품4 업로드</label>
+                    {{ form.image4 }}
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label for="image3" class="form-label">작품 업로드</label>
-                {{ form.image3 }}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="art_name5" class="form-label">작품5 제목</label>
+                    {{ form.art_name5 }}
+                </div>
+                <div class="col-md-6">
+                    <label for="image5" class="form-label">작품5 업로드</label>
+                    {{ form.image5 }}
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label for="image4" class="form-label">작품 업로드</label>
-                {{ form.image4 }}
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="when" class="form-label">촬영 일시</label>
+                    {{ form.when }}
+                </div>
+                <div class="col-md-6">
+                    <label for="where" class="form-label">촬영 장소</label>
+                    {{ form.where }}
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label for="image5" class="form-label">작품 업로드</label>
-                {{ form.image5 }}
-            </div>
-
-            <div class="mb-3">
-                <label for="when" class="form-label">촬영 일시</label>
-                {{ form.when }}
-            </div>
-
-            <div class="mb-3">
-                <label for="where" class="form-label">촬영 장소</label>
-                {{ form.where }}
-            </div>
-
+            <!-- Full width fields -->
             <div class="mb-3">
                 <label for="explanation" class="form-label">작품 설명</label>
                 {{ form.explanation }}
@@ -92,6 +127,7 @@
         <h1>공모전 참가 신청이 마감되었습니다.</h1>
     {% endif %}
 </div>
+
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

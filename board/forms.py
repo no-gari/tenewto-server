@@ -11,6 +11,7 @@ class ApplyForm(forms.Form):
     art_name3 = forms.CharField(max_length=100, label='art_name3', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
     art_name4 = forms.CharField(max_length=100, label='art_name4', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
     art_name5 = forms.CharField(max_length=100, label='art_name5', widget=forms.TextInput(attrs={'class': 'form-control'}), required=False)
+    application = forms.FileField(label='application', widget=forms.FileInput(attrs={'class': 'form-control'}), required=True)
     image1 = forms.ImageField(label='image1', widget=forms.FileInput(attrs={'class': 'form-control'}), required=True)
     image2 = forms.ImageField(label='image2', widget=forms.FileInput(attrs={'class': 'form-control'}), required=False)
     image3 = forms.ImageField(label='image3', widget=forms.FileInput(attrs={'class': 'form-control'}), required=False)

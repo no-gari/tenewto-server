@@ -1,6 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 from .forms import ApplyForm, CheckArtForm
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Application, ApplyAvailable, Board
 
 
@@ -60,6 +60,21 @@ def apply(request):
         }
         return render(request, 'apply.html', {'form': form, **new_context})
     return render(request, 'apply.html', {'form': form})
+
+
+@csrf_exempt
+def apply_init(request):
+    if request.method == 'POST':
+        consent1 = request.POST.get('privacy_agreement1')
+        consent2 = request.POST.get('privacy_agreement2')
+
+        if consent1 and consent2:
+            # 필수 동의 체크 후 처리 (예: 데이터 저장, 기타 로직)
+
+            # 처리 완료 후 리다이렉트
+            return redirect('apply')
+    else:
+        return render(request, 'apply_init.html')
 
 
 def board_list(request):
