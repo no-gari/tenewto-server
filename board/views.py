@@ -40,9 +40,6 @@ def apply(request):
             obj.art_name4 = form.cleaned_data['art_name4']
             obj.art_name5 = form.cleaned_data['art_name5']
             obj.application = form.cleaned_data['application']
-            obj.when = form.cleaned_data['when']
-            obj.where = form.cleaned_data['where']
-            obj.explanation = form.cleaned_data['explanation']
             obj.fixed = form.cleaned_data['fixed']
             obj.image1 = form.cleaned_data.get('image1')
             obj.image2 = form.cleaned_data['image2']

@@ -16,9 +16,6 @@ class Application(models.Model):
     image3 = models.ImageField(upload_to='photos/', verbose_name='이미지3', null=True, blank=True)
     image4 = models.ImageField(upload_to='photos/', verbose_name='이미지4', null=True, blank=True)
     image5 = models.ImageField(upload_to='photos/', verbose_name='이미지5', null=True, blank=True)
-    when = models.DateField(verbose_name='촬영일시')
-    where = models.CharField(max_length=200, verbose_name='촬영장소')
-    explanation = models.TextField(verbose_name='설명')
     fixed = models.TextField(verbose_name='보정 내용')
     applied_at = models.DateTimeField(verbose_name='제출 일시', auto_now_add=True, null=True, blank=True)
 
