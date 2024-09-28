@@ -82,3 +82,7 @@ def board_list(request):
 def board_detail(request, board_id):
     board = get_object_or_404(Board, id=board_id)
     return render(request, 'board_detail.html', {'board': board})
+
+
+def info_img(request):
+    return render(request, 'info-img.html')
