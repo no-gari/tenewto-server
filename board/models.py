@@ -40,7 +40,7 @@ class Board(models.Model):
     description = models.TextField(verbose_name='설명')
     file_upload = models.FileField(upload_to='uploads/', verbose_name='첨부파일', null=True, blank=True)
     datetime = models.DateTimeField(verbose_name='작성 일시', auto_now_add=True)
-    writer = models.CharField(max_length=255, verbose_name='작성자')
+    writer = models.CharField(max_length=255, verbose_name='작성자', default='운영사무국')
 
     class Meta:
         verbose_name = '공지사항'
