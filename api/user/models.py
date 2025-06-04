@@ -138,13 +138,10 @@ class Profile(models.Model):
     blocked_profiles = models.ManyToManyField(
         "self", symmetrical=False, related_name="blocked_by", blank=True, verbose_name=_('차단한 프로필')
     )
-    likes = models.ManyToManyField(
-        "self", symmetrical=False, related_name="liked_by", blank=True, verbose_name=_('좋아요한 프로필')
-    )
     religion = models.CharField(max_length=32, choices=RELIGION_CHOICES, default='other', verbose_name=_('종교'))
     smoke = models.CharField(max_length=32, choices=SMOKE_CHOICES, default='no', verbose_name=_('흡연 여부'))
     height = models.IntegerField(verbose_name=_('키'), null=True, blank=True)
-    mbti = models.CharField(max_length=4, verbose_name=_('흡연 여부'), null=True, blank=True)
+    mbti = models.CharField(max_length=4, verbose_name=_('MBTI'), null=True, blank=True)
     keywords = models.ManyToManyField(Keyword, verbose_name=_('키워드'), blank=True)
     job = models.CharField(max_length=1, choices=JOB_CHOICES, verbose_name=_('직업'), null=True, blank=True)
     job_detail = models.CharField(max_length=32, verbose_name=_('직장 명'), null=True, blank=True)

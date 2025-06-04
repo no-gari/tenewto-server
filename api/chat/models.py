@@ -4,6 +4,7 @@ from api.utils import FilenameChanger
 
 
 class Chat(models.Model):
+    match = models.OneToOneField('matching.Match', on_delete=models.CASCADE, related_name='chat', null=True, blank=True)
     user_set = models.ManyToManyField('user.User', verbose_name='참여자', blank=True)
     created = models.DateTimeField(verbose_name='생성일시', auto_now_add=True)
     updated = models.DateTimeField(verbose_name='수정일시', auto_now=True)
@@ -15,6 +16,9 @@ class Chat(models.Model):
 
     def get_last_message(self):
         return self.message_set.first()
+
+    def __str__(self):
+        return f"Chat {self.id} - {self.created}"
 
 
 class MessageSenderTypeChoices(models.TextChoices):
@@ -36,3 +40,8 @@ class Message(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class ChatRoom(models.Model):
+    match = models.OneToOneField('matching.Match', on_delete=models.CASCADE, related_name='chat_room')
+    created_at = models.DateTimeField(auto_now_add=True)
