@@ -43,7 +43,6 @@ LOCAL_APPS = [
     'api.chat.apps.ChatConfig',
     'api.logger.apps.LoggerConfig',
     'api.notification.apps.NotificationConfig',
-    'board',
 ]
 
 # OTHER LIBRARIES
@@ -228,4 +227,4 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = None
 FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
 
-CSRF_TRUSTED_ORIGINS = ['https://www.tenewto.com', 'https://tenewto.com']
+CSRF_TRUSTED_ORIGINS = ['*',]
