@@ -40,8 +40,3 @@ class Message(models.Model):
 
     def __str__(self):
         return self.text
-
-
-class ChatRoom(models.Model):
-    match = models.OneToOneField('matching.Match', on_delete=models.CASCADE, related_name='chat_room')
-    created_at = models.DateTimeField(auto_now_add=True)

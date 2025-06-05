@@ -34,6 +34,7 @@ class ChatListSerializer(serializers.ModelSerializer):
 
 class MessageListSerializer(serializers.ModelSerializer):
     is_mine = serializers.SerializerMethodField()
+    image = serializers.ImageField(source='message_image')
 
     class Meta:
         model = Message

@@ -8,6 +8,11 @@ from django.db import transaction
 from api.chat.models import Message, Chat
 
 
+@database_sync_to_async
+def check_user_in_chat(self):
+    return self.chat.user_set.filter(pk=self.user.pk).exists()
+
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.user = self.scope['user']
@@ -16,7 +21,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # 채팅방이 있는지 확인
         self.chat = await self.get_chat()
         if self.chat:
-            if self.user in self.chat.user_set.all():
+            if self.chat and await self.check_user_in_chat():
                 await self.channel_layer.group_add(
                     self.chat_id,
                     self.channel_name,
@@ -49,11 +54,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def send_message(self, event):
-        sender_type = event['sender_type']
+        user = event['user']
         text = event['text']
         created = event['created']
         await self.send(text_data=json.dumps({
-            'senderType': sender_type,
+            'user': user,
             'text': text,
             'created': created,
         }))
