@@ -127,7 +127,6 @@ class Profile(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6, verbose_name=_('경도'), null=True, blank=True)
     birthdate = models.DateField(null=True, blank=True, verbose_name=_('생일'))
     age = models.PositiveIntegerField(null=True, blank=True, verbose_name=_('나이'))
-    nationality = models.TextField(max_length=20, null=True, verbose_name=_('국적'))
     city = models.TextField(max_length=15, null=True, blank=True, verbose_name=_('도시'))
     gender = models.CharField(
         choices=GENDER_CHOICES,
@@ -202,24 +201,6 @@ class ProfileImage(models.Model):
 
     def __str__(self):
         return self.profile.nickname + '의 이미지'
-
-
-class Match(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name=_('uuid'))
-    profile1 = models.ForeignKey(
-        Profile, related_name="profile1_matches", default=None, on_delete=models.CASCADE, verbose_name=_('사용자1')
-    )
-    profile2 = models.ForeignKey(
-        Profile, related_name="profile2_matches", default=None, on_delete=models.CASCADE, verbose_name=_('사용자2')
-    )
-    created_at = models.DateTimeField(default=timezone.now, verbose_name=_('매칭 시각'))
-
-    class Meta:
-        verbose_name = '매칭'
-        verbose_name_plural = verbose_name
-
-    def __str__(self):
-        return self.profile1.user.nickname + '과' + self.profile2.user.nickname + '의 매칭'
 
 
 class SocialKindChoices(models.TextChoices):

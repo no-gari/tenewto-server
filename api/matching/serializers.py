@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Match, Like
 from api.user.serializers import ProfileSerializer
 
+
 class LikeSerializer(serializers.ModelSerializer):
     to_user_profile = ProfileSerializer(source='to_user.profile', read_only=True)
     from_user_profile = ProfileSerializer(source='from_user.profile', read_only=True)
@@ -11,6 +12,7 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ['id', 'from_user', 'to_user', 'status', 'created_at', 'updated_at', 
                  'to_user_profile', 'from_user_profile']
         read_only_fields = ['created_at', 'updated_at', 'from_user']
+
 
 class MatchSerializer(serializers.ModelSerializer):
     user1_profile = ProfileSerializer(source='user1.profile', read_only=True)
@@ -32,6 +34,7 @@ class MatchSerializer(serializers.ModelSerializer):
             else:
                 return ProfileSerializer(obj.user1.profile).data
         return None
+
 
 class LikeResponseSerializer(serializers.Serializer):
     """좋아요에 대한 응답(수락/거절) 시리얼라이저"""

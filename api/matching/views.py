@@ -2,13 +2,12 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
-from django.contrib.gis.db.models.functions import Distance
-from django.contrib.gis.geos import Point
 from .models import Match, Like
 from .serializers import MatchSerializer, LikeSerializer, LikeResponseSerializer
 from api.user.models import Profile
 from api.user.serializers import ProfileSerializer
 from api.chat.models import Chat
+
 
 class LikeViewSet(viewsets.ModelViewSet):
     serializer_class = LikeSerializer
@@ -121,6 +120,7 @@ class LikeViewSet(viewsets.ModelViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     """매칭된 사용자들 조회 (매칭은 자동으로 생성되므로 읽기 전용)"""
     serializer_class = MatchSerializer
@@ -131,6 +131,7 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
         return Match.objects.filter(
             Q(user1=self.request.user) | Q(user2=self.request.user)
         )
+
 
 class RecommendViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -229,17 +230,17 @@ class RecommendViewSet(viewsets.ViewSet):
         queryset = queryset.filter(**filters)
         
         # 위치 기반 필터링
-        max_distance = request.query_params.get('max_distance')
-        if max_distance and user_profile.latitude and user_profile.longitude:
-            user_location = Point(
-                float(user_profile.longitude), 
-                float(user_profile.latitude), 
-                srid=4326
-            )
-            queryset = queryset.annotate(
-                distance=Distance('location', user_location)
-            ).filter(
-                distance__lte=float(max_distance) * 1000  # km를 m로 변환
-            ).order_by('distance')
+        # max_distance = request.query_params.get('max_distance')
+        # if max_distance and user_profile.latitude and user_profile.longitude:
+        #     user_location = Point(
+        #         float(user_profile.longitude),
+        #         float(user_profile.latitude),
+        #         srid=4326
+        #     )
+        #     queryset = queryset.annotate(
+        #         distance=Distance('location', user_location)
+        #     ).filter(
+        #         distance__lte=float(max_distance) * 1000  # km를 m로 변환
+        #     ).order_by('distance')
         
         return queryset

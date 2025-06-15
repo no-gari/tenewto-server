@@ -63,8 +63,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = (
             'profile_image', 'points', 'firebase_token', 'latitude', 'longitude', 'birthdate', 'age',
-            'nationality', 'city', 'gender', 'blocked_profiles', 'likes', 'religion', 'smoke', 'height',
-            'mbti', 'keywords', 'job', 'job_detail', 'school_level', 'school_name', 'school_major', 'profile_image',
+            'city', 'gender', 'blocked_profiles', 'likes', 'religion', 'smoke', 'height', 'profile_image',
+            'mbti', 'keywords', 'job', 'job_detail', 'school_level', 'school_name', 'school_major',
         )
 
     def get_profile_image(self, obj):

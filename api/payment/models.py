@@ -4,8 +4,8 @@ from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 import uuid
 
+
 class PointTransaction(models.Model):
-    """포인트 충전 내역"""
     STATUS_CHOICES = [
         ('pending', '대기중'),
         ('completed', '완료'),
@@ -66,7 +66,6 @@ class PointTransaction(models.Model):
 
 
 class PointUsage(models.Model):
-    """포인트 사용 내역"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
