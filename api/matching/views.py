@@ -2,11 +2,67 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
-from .models import Match, Like
-from .serializers import MatchSerializer, LikeSerializer, LikeResponseSerializer
+from .models import Match, Like, Block
+from .serializers import MatchSerializer, LikeSerializer, LikeResponseSerializer, BlockSerializer, BlockCreateSerializer
 from api.user.models import Profile
 from api.user.serializers import ProfileSerializer
 from api.chat.models import Chat
+
+
+class BlockViewSet(viewsets.ModelViewSet):
+    """사용자 차단 관리"""
+    serializer_class = BlockSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """내가 차단한 사용자들"""
+        return Block.objects.filter(blocker=self.request.user)
+
+    def get_serializer_class(self):
+        """액션에 따라 다른 시리얼라이저 사용"""
+        if self.action == 'create':
+            return BlockCreateSerializer
+        return BlockSerializer
+
+    def perform_create(self, serializer):
+        """차단 생성 시 자동으로 blocker 설정"""
+        block = serializer.save(blocker=self.request.user)
+        
+        # 기존 좋아요 관계가 있다면 삭제
+        Like.objects.filter(
+            Q(from_user=self.request.user, to_user=block.blocked_user) |
+            Q(from_user=block.blocked_user, to_user=self.request.user)
+        ).delete()
+        
+        # 기존 매칭이 있다면 삭제
+        Match.objects.filter(
+            Q(user1=self.request.user, user2=block.blocked_user) |
+            Q(user1=block.blocked_user, user2=self.request.user)
+        ).delete()
+
+    @action(detail=True, methods=['delete'])
+    def unblock(self, request, pk=None):
+        """차단 해제"""
+        try:
+            block = Block.objects.get(
+                id=pk,
+                blocker=request.user
+            )
+        except Block.DoesNotExist:
+            return Response(
+                {'error': '해당 차단 기록을 찾을 수 없습니다.'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        block.delete()
+        return Response({'message': '차단이 해제되었습니다.'})
+
+    @action(detail=False, methods=['get'])
+    def blocked_users(self, request):
+        """내가 차단한 사용자 목록"""
+        blocks = self.get_queryset()
+        serializer = self.get_serializer(blocks, many=True)
+        return Response(serializer.data)
 
 
 class LikeViewSet(viewsets.ModelViewSet):
@@ -168,11 +224,11 @@ class RecommendViewSet(viewsets.ViewSet):
         """제외할 사용자 ID들 반환"""
         excluded_users = [current_user.id]
         
-        # 차단한/차단당한 사용자들
-        blocked_profiles = user_profile.blocked_profiles.values_list('user_id', flat=True)
-        blocked_by_profiles = user_profile.blocked_by.values_list('user_id', flat=True)
-        excluded_users.extend(blocked_profiles)
-        excluded_users.extend(blocked_by_profiles)
+        # 차단한/차단당한 사용자들 (Block 모델 사용)
+        blocked_users = Block.objects.filter(blocker=current_user).values_list('blocked_user_id', flat=True)
+        blocked_by_users = Block.objects.filter(blocked_user=current_user).values_list('blocker_id', flat=True)
+        excluded_users.extend(blocked_users)
+        excluded_users.extend(blocked_by_users)
         
         # 이미 좋아요한 사용자들
         liked_users = Like.objects.filter(from_user=current_user).values_list('to_user_id', flat=True)

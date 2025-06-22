@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Match, Like
+from .models import Match, Like, Block
 from api.user.serializers import ProfileSerializer
 
 
@@ -12,6 +12,30 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ['id', 'from_user', 'to_user', 'status', 'created_at', 'updated_at', 
                  'to_user_profile', 'from_user_profile']
         read_only_fields = ['created_at', 'updated_at', 'from_user']
+
+
+class BlockSerializer(serializers.ModelSerializer):
+    blocked_user_profile = ProfileSerializer(source='blocked_user.profile', read_only=True)
+    
+    class Meta:
+        model = Block
+        fields = ['id', 'blocked_user', 'reason', 'created_at', 'blocked_user_profile']
+        read_only_fields = ['created_at', 'blocker']
+
+
+class BlockCreateSerializer(serializers.ModelSerializer):
+    """차단 생성용 시리얼라이저"""
+    
+    class Meta:
+        model = Block
+        fields = ['blocked_user', 'reason']
+    
+    def validate_blocked_user(self, value):
+        """자신을 차단할 수 없도록 검증"""
+        request = self.context.get('request')
+        if request and request.user == value:
+            raise serializers.ValidationError("자신을 차단할 수 없습니다.")
+        return value
 
 
 class MatchSerializer(serializers.ModelSerializer):

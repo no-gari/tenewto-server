@@ -26,6 +26,23 @@ class Like(models.Model):
         return f"{self.from_user} -> {self.to_user} ({self.status})"
 
 
+class Block(models.Model):
+    """사용자 차단 모델"""
+    blocker = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='blocks_sent', on_delete=models.CASCADE)
+    blocked_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='blocks_received', on_delete=models.CASCADE)
+    reason = models.CharField(max_length=200, blank=True, null=True, verbose_name=_('차단 사유'))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('차단')
+        verbose_name_plural = verbose_name
+        unique_together = ('blocker', 'blocked_user')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.blocker} -> {self.blocked_user}"
+
+
 class Match(models.Model):
     user1 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='matches_as_user1', on_delete=models.CASCADE)
     user2 = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='matches_as_user2', on_delete=models.CASCADE)

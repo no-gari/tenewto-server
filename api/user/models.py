@@ -132,9 +132,6 @@ class Profile(models.Model):
         max_length=1,
         verbose_name=_('성별')
     )
-    blocked_profiles = models.ManyToManyField(
-        "self", symmetrical=False, related_name="blocked_by", blank=True, verbose_name=_('차단한 프로필')
-    )
     religion = models.CharField(max_length=32, choices=RELIGION_CHOICES, default='other', verbose_name=_('종교'))
     smoke = models.CharField(max_length=32, choices=SMOKE_CHOICES, default='no', verbose_name=_('흡연 여부'))
     height = models.IntegerField(verbose_name=_('키'), null=True, blank=True)
