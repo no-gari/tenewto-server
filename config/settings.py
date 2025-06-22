@@ -9,11 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', '')
 DEBUG = os.getenv('DEBUG')
 
-# if DEBUG is False:
-#     CSRF_TRUSTED_ORIGINS = [
-#         'http://localhost:3000',
-#         'http://localhost:8000',
-#     ]
+ALLOWED_HOSTS = ['34.47.77.195', '127.0.0.1', 'localhost']
 
 # Application definition
 
