@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 
 class Like(models.Model):
@@ -16,6 +17,8 @@ class Like(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        verbose_name = _('좋아요')
+        verbose_name_plural = verbose_name
         unique_together = ('from_user', 'to_user')
         ordering = ['-created_at']
 
@@ -30,6 +33,8 @@ class Match(models.Model):
     # 양방향 좋아요가 성사되면 자동으로 매치 생성되므로 별도 status 불필요
 
     class Meta:
+        verbose_name = _('매칭')
+        verbose_name_plural = verbose_name
         unique_together = ('user1', 'user2')
         ordering = ['-created_at']
 

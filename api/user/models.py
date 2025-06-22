@@ -1,10 +1,8 @@
 from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
 from django.utils.translation import gettext_lazy as _
-from api.helpers import get_conversation_between
 from api.utils import FilenameChanger
 from django.utils import timezone
 from api.chat.models import Chat
-from django.db.models import Q
 from model_utils import Choices
 from django.db import models
 import uuid
@@ -141,32 +139,13 @@ class Profile(models.Model):
     smoke = models.CharField(max_length=32, choices=SMOKE_CHOICES, default='no', verbose_name=_('흡연 여부'))
     height = models.IntegerField(verbose_name=_('키'), null=True, blank=True)
     mbti = models.CharField(max_length=4, verbose_name=_('MBTI'), null=True, blank=True)
-    keywords = models.ManyToManyField(Keyword, verbose_name=_('키워드'), blank=True)
+    keywords = models.TextField(verbose_name=_('키워드'), null=True, blank=True)
     job = models.CharField(max_length=1, choices=JOB_CHOICES, verbose_name=_('직업'), null=True, blank=True)
     job_detail = models.CharField(max_length=32, verbose_name=_('직장 명'), null=True, blank=True)
     school_level = models.CharField(max_length=1, verbose_name=_('학력'), choices=SCHOOL_CHOICES, null=True, blank=True)
     school_name = models.CharField(max_length=32, verbose_name=_('학교 이름'), null=True, blank=True)
     school_major = models.CharField(max_length=32, verbose_name=_('학교 전공'), null=True, blank=True)
-
-    def block_profile(self, blocked_profile):
-        # Remove likes between
-        self.likes.remove(blocked_profile)
-        blocked_profile.likes.remove(self)
-
-        # Check for existing match between profiles and delete it
-        match_qs = Match.objects.filter(
-            Q(profile1=self, profile2=blocked_profile)
-            | Q(profile1=blocked_profile, profile2=self)
-        )
-        if match_qs.exists():
-            match_qs.delete()
-
-        # check is there is any conversation between and delete it
-        conversation = get_conversation_between(self, blocked_profile)
-        if conversation:
-            conversation.delete()
-
-        self.blocked_profiles.add(blocked_profile)
+    hobby = models.TextField(verbose_name=_('취미'), null=True, blank=True)
 
     def delete(self, *args, **kwargs):
         chats = Chat.objects.filter(user_set=self)
