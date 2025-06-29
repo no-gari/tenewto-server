@@ -62,7 +62,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = (
-            'profile_image', 'points', 'firebase_token', 'latitude', 'longitude', 'birthdate', 'age',
+            'nickname', 'profile_image', 'points', 'firebase_token', 'latitude', 'longitude', 'birthdate', 'age',
             'city', 'gender', 'blocked_profiles', 'likes', 'religion', 'smoke', 'height', 'profile_image',
             'mbti', 'keywords', 'job', 'job_detail', 'school_level', 'school_name', 'school_major',
         )
