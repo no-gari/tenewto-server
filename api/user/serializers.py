@@ -13,7 +13,7 @@ class UserRegisterSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, required=False)
     password_confirm = serializers.CharField(write_only=True, required=False)
 
-    access = serializers.CharField()
+    access = serializers.CharField(read_only=True)
     refresh = serializers.CharField(read_only=True)
 
     def validate(self, attrs):
