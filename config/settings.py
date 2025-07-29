@@ -30,6 +30,7 @@ LOCAL_APPS = [
     'api.payment.apps.PaymentConfig',
     'api.matching.apps.MatchingConfig',
     'api.notification.apps.NotificationConfig',
+    'api.recommendation.apps.RecommendationConfig',
 ]
 
 # OTHER LIBRARIES

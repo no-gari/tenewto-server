@@ -6,4 +6,5 @@ urlpatterns = [
     path('matching/', include('api.matching.urls')),
     path('chat/', include('api.chat.urls')),
     path('payment/', include('api.payment.urls')),
+    path('recommendation/', include('api.recommendation.urls')),
 ]

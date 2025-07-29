@@ -115,3 +115,13 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_profile_image(self, obj):
         return ProfileImageSerializer(obj.profileimage_set.all(), many=True).data
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """기본 사용자 정보 시리얼라이저 (추천 시스템용)"""
+    profile = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'nickname', 'is_active', 'created', 'profile']
+        read_only_fields = ['id', 'email', 'created']
