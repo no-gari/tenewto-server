@@ -141,11 +141,11 @@ def _get_recommendation_candidates(user, count):
     excluded_users.update(liked_users)
 
     # 내가 차단한 사용자
-    i_blocked = Block.objects.filter(from_user=user).values_list('to_user_id', flat=True)
+    i_blocked = Block.objects.filter(blocker=user).values_list('blocked_user_id', flat=True)
     excluded_users.update(i_blocked)
 
     # 나를 차단한 사용자
-    blocked_me = Block.objects.filter(to_user=user).values_list('from_user_id', flat=True)
+    blocked_me = Block.objects.filter(blocked_user=user).values_list('blocker_id', flat=True)
     excluded_users.update(blocked_me)
 
     # 오늘 이미 추천받은 사용자들 제외
@@ -155,20 +155,16 @@ def _get_recommendation_candidates(user, count):
     ).values_list('recommended_user_id', flat=True)
     excluded_users.update(today_recommended)
 
-    # 추천 후보 쿼리
+    # 추천 후보 쿼리 - 활성 사용자만
     candidates = User.objects.exclude(id__in=excluded_users).filter(
         is_active=True
     )
 
-    # 성별 기반 필터링
-    if user.preferred_gender != 'ALL':
-        candidates = candidates.filter(gender=user.preferred_gender)
+    # Profile이 있는 사용자만 추천 (Profile이 없으면 gender 등에 접근할 때 에러 발생)
+    candidates = candidates.filter(profile__isnull=False)
 
-    # 상대방의 선호 성별도 고려 (양방향 매칭)
-    # 내 성별을 선호하거나('ALL'), 모든 성별을 선호하는('ALL') 사용자
-    candidates = candidates.filter(
-        Q(preferred_gender=user.gender) | Q(preferred_gender='ALL')
-    )
+    # 성별 기반 필터링은 일단 제거 (preferred_gender 필드가 없음)
+    # 추후 매칭 설정 모델을 만들어서 사용자 선호도를 저장할 수 있음
 
     # 랜덤 선택 (실제로는 더 정교한 추천 알고리즘을 사용할 수 있음)
     candidate_list = list(candidates)
