@@ -1,83 +1,81 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
-from django.utils import timezone
-from django.db.models import Q, Exists, OuterRef
-from datetime import date, datetime, timedelta
-import random
-
-from .models import DailyRecommendation, RecommendationSettings, RecommendationHistory
-from .serializers import (
-    DailyRecommendationSerializer,
-    RecommendationHistorySerializer,
-    RecommendationResponseSerializer
-)
+from api.user.serializers import ProfileSerializer
+from django.db.models import Q
+from asgiref.sync import sync_to_async
+from django.db import transaction
+from .models import RecommendationHistory
 from api.user.models import User
 from api.matching.models import Like, Block
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_daily_recommendations(request):
-    """일일 추천 사용자 목록 조회"""
-    user = request.user
-    today = date.today()
+class RecommendationAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProfileSerializer
 
-    # 추천 설정 조회
-    settings = RecommendationSettings.objects.first()
-    if not settings or not settings.is_active:
-        return Response({
-            'error': '추천 서비스가 비활성화되어 있습니다.'
-        }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    async def get_queryset(self):
+        candidates = await self.get_recommendation_candidates(self.request.user)
+        await self.create_recommendation_histories(candidates)
+        return candidates
 
-    # 오늘 이미 받은 추천 수 확인
-    today_recommendations = DailyRecommendation.objects.filter(
-        user=user,
-        date=today
-    ).count()
+    @sync_to_async
+    def create_recommendation_histories(self, candidates):
+        with transaction.atomic():
+            existing_histories = set(
+                RecommendationHistory.objects.filter(
+                    user=self.request.user,
+                    recommended_user__in=[c.user for c in candidates]
+                ).values_list('recommended_user_id', flat=True)
+            )
 
-    remaining_count = max(0, settings.daily_limit - today_recommendations)
+            new_histories = [
+                RecommendationHistory(
+                    user=self.request.user,
+                    recommended_user=candidate.user,
+                    viewed=False,
+                    liked=False
+                )
+                for candidate in candidates
+                if candidate.user.id not in existing_histories
+            ]
 
-    if remaining_count == 0:
-        # 다음 리셋 시간 (다음날 00:00)
-        next_reset = datetime.combine(today + timedelta(days=1), datetime.min.time())
-        next_reset = timezone.make_aware(next_reset)
+            if new_histories:
+                RecommendationHistory.objects.bulk_create(new_histories)
 
-        return Response({
-            'users': [],
-            'remaining_count': 0,
-            'next_reset_time': next_reset,
-            'message': '오늘의 추천을 모두 받으셨습니다.'
-        })
+    @sync_to_async
+    def get_recommendation_candidates(user):
+        # 제외할 사용자 ID 목록 만들기
+        excluded_ids = set()
+        excluded_ids.add(user.id)  # 자기 자신
 
-    # 추천할 사용자 선택 로직
-    recommended_users = _get_recommendation_candidates(user, remaining_count)
+        # 이미 좋아요를 보낸 사용자
+        liked_ids = Like.objects.filter(from_user=user).values_list('to_user', flat=True)
+        excluded_ids.update(liked_ids)
 
-    # 추천 기록 저장
-    for recommended_user in recommended_users:
-        DailyRecommendation.objects.get_or_create(
-            user=user,
-            recommended_user=recommended_user,
-            date=today
-        )
+        # 차단한 사용자 or 차단당한 사용자
+        blocked_ids = Block.objects.filter(
+            Q(blocker=user) | Q(blocked_user=user)
+        ).values_list('blocker', 'blocked_user')
 
-        RecommendationHistory.objects.create(
-            user=user,
-            recommended_user=recommended_user
-        )
+        # blocked_ids는 튜플로 나오므로 평탄화
+        for pair in blocked_ids:
+            excluded_ids.update(pair)
 
-    # 응답 데이터 구성
-    remaining_count_after_recommendation = max(0, remaining_count - len(recommended_users))
-    next_reset = datetime.combine(today + timedelta(days=1), datetime.min.time())
+        # 후보군 조회 (User의 profile이 있는 활성 사용자)
+        candidates = User.objects.filter(
+            is_active=True,
+            profile__isnull=False
+        ).exclude(
+            id__in=excluded_ids
+        ).select_related('profile')
 
-    serializer = RecommendationResponseSerializer({
-        'users': recommended_users,
-        'remaining_count': remaining_count_after_recommendation,
-        'next_reset_time': timezone.make_aware(next_reset)
-    })
+        # 프로필 리스트로 변환
+        profiles = [user.profile for user in candidates]
 
-    return Response(serializer.data)
+        return profiles
 
 
 @api_view(['POST'])
@@ -117,57 +115,3 @@ def mark_recommendation_liked(request, user_id):
         return Response({
             'error': '해당 추천 기록을 찾을 수 없습니다.'
         }, status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_recommendation_history(request):
-    """추천 기록 조회"""
-    history = RecommendationHistory.objects.filter(user=request.user)
-    serializer = RecommendationHistorySerializer(history, many=True)
-    return Response(serializer.data)
-
-
-def _get_recommendation_candidates(user, count):
-    """추천 후보 사용자 선택 로직"""
-    # 제외할 사용자들
-    excluded_users = set()
-
-    # 자기 자신 제외
-    excluded_users.add(user.id)
-
-    # 이미 좋아요한 사용자들 제외
-    liked_users = Like.objects.filter(from_user=user).values_list('to_user_id', flat=True)
-    excluded_users.update(liked_users)
-
-    # 내가 차단한 사용자
-    i_blocked = Block.objects.filter(blocker=user).values_list('blocked_user_id', flat=True)
-    excluded_users.update(i_blocked)
-
-    # 나를 차단한 사용자
-    blocked_me = Block.objects.filter(blocked_user=user).values_list('blocker_id', flat=True)
-    excluded_users.update(blocked_me)
-
-    # 오늘 이미 추천받은 사용자들 제외
-    today_recommended = DailyRecommendation.objects.filter(
-        user=user,
-        date=date.today()
-    ).values_list('recommended_user_id', flat=True)
-    excluded_users.update(today_recommended)
-
-    # 추천 후보 쿼리 - 활성 사용자만
-    candidates = User.objects.exclude(id__in=excluded_users).filter(
-        is_active=True
-    )
-
-    # Profile이 있는 사용자만 추천 (Profile이 없으면 gender 등에 접근할 때 에러 발생)
-    candidates = candidates.filter(profile__isnull=False)
-
-    # 성별 기반 필터링은 일단 제거 (preferred_gender 필드가 없음)
-    # 추후 매칭 설정 모델을 만들어서 사용자 선호도를 저장할 수 있음
-
-    # 랜덤 선택 (실제로는 더 정교한 추천 알고리즘을 사용할 수 있음)
-    candidate_list = list(candidates)
-    random.shuffle(candidate_list)
-
-    return candidate_list[:count]
