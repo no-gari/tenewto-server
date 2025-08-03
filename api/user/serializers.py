@@ -108,10 +108,10 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ('nickname', 'avatar', 'created_at', 'points', 'firebase_token', 'latitude', 'longitude',
+        fields = ('id', 'nickname', 'avatar', 'created_at', 'points', 'firebase_token', 'latitude', 'longitude',
                   'birthdate', 'age', 'city', 'gender', 'religion', 'smoke', 'height', 'mbti', 'keywords',
                   'job', 'job_detail', 'school_level', 'school_name', 'school_major', 'hobby', 'profile_image')
-        read_only_fields = ('created_at', 'points', 'profile_image')
+        read_only_fields = ('id', 'created_at', 'points', 'profile_image')
 
     def get_profile_image(self, obj):
         return ProfileImageSerializer(obj.profileimage_set.all(), many=True).data
