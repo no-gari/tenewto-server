@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
 from .models import Match, Like, Block
+from api.user.models import User
 from .serializers import MatchSerializer, LikeSerializer, LikeResponseSerializer, BlockSerializer, BlockCreateSerializer
 from api.user.models import Profile
 from api.user.serializers import ProfileSerializer
@@ -209,13 +210,13 @@ class RecommendViewSet(viewsets.ViewSet):
         queryset = Profile.objects.exclude(user__in=excluded_users)
         
         # 필터 적용
-        queryset = self._apply_filters(queryset, request, user_profile)
+        # queryset = self._apply_filters(queryset, request, user_profile)
         
         # 페이지네이션
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = ProfileSerializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
+        # page = self.paginate_queryset(queryset)
+        # if page is not None:
+        #     serializer = ProfileSerializer(page, many=True, context={'request': request})
+        #     return self.get_paginated_response(serializer.data)
 
         serializer = ProfileSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data)
@@ -233,17 +234,21 @@ class RecommendViewSet(viewsets.ViewSet):
         # 이미 좋아요한 사용자들
         liked_users = Like.objects.filter(from_user=current_user).values_list('to_user_id', flat=True)
         excluded_users.extend(liked_users)
-        
+
+        # 프로필이 없는 사용자들
+        no_profile_users = User.objects.filter(profile__isnull=True).values_list('id', flat=True)
+        excluded_users.extend(no_profile_users)
+
         # 매칭된 사용자들
-        matched_users = Match.objects.filter(
-            Q(user1=current_user) | Q(user2=current_user)
-        ).values_list('user1_id', 'user2_id')
+        # matched_users = Match.objects.filter(
+        #     Q(user1=current_user) | Q(user2=current_user)
+        # ).values_list('user1_id', 'user2_id')
         
-        for user1_id, user2_id in matched_users:
-            if user1_id != current_user.id:
-                excluded_users.append(user1_id)
-            if user2_id != current_user.id:
-                excluded_users.append(user2_id)
+        # for user1_id, user2_id in matched_users:
+        #     if user1_id != current_user.id:
+        #         excluded_users.append(user1_id)
+        #     if user2_id != current_user.id:
+        #         excluded_users.append(user2_id)
         
         return list(set(excluded_users))  # 중복 제거
     
