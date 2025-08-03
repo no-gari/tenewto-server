@@ -6,12 +6,12 @@ urlpatterns = [
     path('likes/', LikeViewSet.as_view({'get': 'list', 'post': 'create'}), name='likes'),
     path('likes/<uuid:pk>/', LikeViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}), name='like-detail'),
     path('likes/received/', LikeViewSet.as_view({'get': 'received'}), name='likes-received'),
-    path('likes/<uuid:pk>/respond/', LikeViewSet.as_view({'post': 'respond'}), name='like-respond'),
+    path('likes/respond/<uuid:pk>/', LikeViewSet.as_view({'post': 'respond'}), name='like-respond'),
     
     # 차단 관련
     path('blocks/', BlockViewSet.as_view({'get': 'list', 'post': 'create'}), name='blocks'),
     path('blocks/<uuid:pk>/', BlockViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}), name='block-detail'),
-    path('blocks/<uuid:pk>/unblock/', BlockViewSet.as_view({'delete': 'unblock'}), name='block-unblock'),
+    path('blocks/unblock/<uuid:pk>/', BlockViewSet.as_view({'delete': 'unblock'}), name='block-unblock'),
     path('blocks/blocked-users/', BlockViewSet.as_view({'get': 'blocked_users'}), name='blocked-users'),
     
     # 매칭 관련 (읽기 전용)
