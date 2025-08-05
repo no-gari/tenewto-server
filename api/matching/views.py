@@ -135,39 +135,23 @@ class LikeViewSet(viewsets.ModelViewSet):
                 # 좋아요 수락
                 like.status = 'accepted'
                 like.save()
-                
-                # 내가 상대방을 좋아했는지 확인
-                my_like = Like.objects.filter(
-                    from_user=request.user,
-                    to_user=like.from_user
-                ).first()
-                
-                if my_like and my_like.status == 'pending':
-                    # 양방향 좋아요이므로 매칭 생성
-                    my_like.status = 'accepted'
-                    my_like.save()
-                    
-                    match = Match.objects.create(
-                        user1=like.from_user,
-                        user2=request.user
-                    )
-                    
-                    # 채팅방 생성
-                    chat = Chat.objects.create(match=match)
-                    chat.user_set.add(match.user1, match.user2)
-                    
-                    return Response({
-                        'status': 'matched',
-                        'message': '매칭이 성사되었습니다!',
-                        'match_id': match.id
-                    })
-                else:
-                    return Response({
-                        'status': 'accepted',
-                        'message': '좋아요를 수락했습니다.'
-                    })
+
+                match = Match.objects.create(
+                    user1=like.from_user,
+                    user2=request.user
+                )
+
+                # 채팅방 생성
+                chat = Chat.objects.create(match=match)
+                chat.user_set.add(match.user1, match.user2)
+
+                return Response({
+                    'status': 'matched',
+                    'message': '매칭이 성사되었습니다!',
+                    'match_id': match.id
+                })
             
-            elif action == 'reject':
+            else:
                 like.status = 'rejected'
                 like.save()
                 return Response({
