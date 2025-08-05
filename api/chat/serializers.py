@@ -28,8 +28,8 @@ class ChatListSerializer(serializers.ModelSerializer):
         fields = ['id', 'opponent_set', 'last_message', 'updated']
 
     def get_opponent_set(self, obj):
-        opponent_set = obj.user_set.exclude(pk=self.context['request'].user.pk)
-        return OpponentSerializer(instance=opponent_set, many=True).data
+        opponent_set = obj.user_set.exclude(pk=self.context['request'].user.pk).first()
+        return OpponentSerializer(instance=opponent_set).data if opponent_set else None
 
 
 class MessageListSerializer(serializers.ModelSerializer):
