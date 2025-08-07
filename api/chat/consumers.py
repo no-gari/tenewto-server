@@ -1,16 +1,8 @@
-import json
-from urllib.parse import parse_qsl, urlsplit
-
-from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
-from django.db import transaction
-
+from channels.db import database_sync_to_async
 from api.chat.models import Message, Chat
-
-
-@database_sync_to_async
-def check_user_in_chat(self):
-    return self.chat.user_set.filter(pk=self.user.pk).exists()
+from django.db import transaction
+import json
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -31,6 +23,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.close()
         else:
             await self.close()
+
+    @database_sync_to_async
+    def check_user_in_chat(self):
+        return self.chat.user_set.filter(pk=self.user.pk).exists()
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
