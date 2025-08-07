@@ -36,6 +36,7 @@ LOCAL_APPS = [
 THIRD_PARTY_APPS = [
     # CHAT
     'channels',
+    "daphne",
     # DJANGO STORAGES FOR SERVER
     'storages',
     # filter
@@ -91,7 +92,7 @@ AUTH_USER_MODEL = 'user.User'
 
 # APPLICATION
 WSGI_APPLICATION = 'config.wsgi.application'
-ASGI_APPLICATION = 'django_app.asgi.application'
+ASGI_APPLICATION = 'config.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
