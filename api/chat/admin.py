@@ -9,4 +9,6 @@ class ChatAdmin(admin.ModelAdmin):
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('id', 'chat', 'user', 'text', 'created')
+    list_filter = ('created', 'user')
+    search_fields = ('text', 'chat__id')

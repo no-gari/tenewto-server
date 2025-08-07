@@ -69,7 +69,5 @@ class ChatConsumer(AsyncWebsocketConsumer):
             user=self.user,
             text=text,
         )
-
-        self.chat.updated = message.created
         self.chat.save()
         return message
