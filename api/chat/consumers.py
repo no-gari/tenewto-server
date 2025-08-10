@@ -30,21 +30,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name,
         )
 
-    # async def receive(self, text_data):
-    #     text_data_json = json.loads(text_data)
-    #     text = text_data_json['text']
-    #     message = await self.create_message(text)
-    #
-    #     # datetime 객체를 ISO 형식 문자열로 변환하여 채널 레이어로 전송
-    #     await self.channel_layer.group_send(
-    #         self.chat_id,
-    #         {
-    #             'type': 'send_message',
-    #             'user': message.user.pk,
-    #             'text': message.text,
-    #             'created': message.created.isoformat(),
-    #         },
-    #     )
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         text = text_data_json['text']
