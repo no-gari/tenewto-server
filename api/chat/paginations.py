@@ -2,4 +2,4 @@ from rest_framework.pagination import PageNumberPagination, LimitOffsetPaginatio
 
 
 class MessagePagination(LimitOffsetPagination):
-    default_limit = 10
+    default_limit = 100

@@ -24,4 +24,4 @@ class MessageListView(ListAPIView):
     permission_classes = [IsChatOwner]
 
     def get_queryset(self):
-        return self.queryset.filter(chat_id=self.kwargs['pk'])
+        return self.queryset.filter(chat_id=self.kwargs['pk']).order_by('-id')

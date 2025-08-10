@@ -35,10 +35,13 @@ class ChatListSerializer(serializers.ModelSerializer):
 class MessageListSerializer(serializers.ModelSerializer):
     is_mine = serializers.SerializerMethodField()
     image = serializers.ImageField(source='message_image')
+    created = serializers.DateTimeField(
+        format='%Y-%m-%d %H:%M:%S%z',
+    )
 
     class Meta:
         model = Message
-        fields = ['is_mine', 'text', 'image', 'created']
+        fields = ['id', 'is_mine', 'text', 'image', 'created']
 
     def get_is_mine(self, obj):
         return self.context['request'].user == obj.user

@@ -30,12 +30,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name,
         )
 
+    # async def receive(self, text_data):
+    #     text_data_json = json.loads(text_data)
+    #     text = text_data_json['text']
+    #     message = await self.create_message(text)
+    #
+    #     # datetime 객체를 ISO 형식 문자열로 변환하여 채널 레이어로 전송
+    #     await self.channel_layer.group_send(
+    #         self.chat_id,
+    #         {
+    #             'type': 'send_message',
+    #             'user': message.user.pk,
+    #             'text': message.text,
+    #             'created': message.created.isoformat(),
+    #         },
+    #     )
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         text = text_data_json['text']
         message = await self.create_message(text)
 
-        # datetime 객체를 ISO 형식 문자열로 변환하여 채널 레이어로 전송
+        # 채널 레이어로 전송할 때 더 많은 정보 포함
         await self.channel_layer.group_send(
             self.chat_id,
             {
@@ -43,15 +58,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'user': message.user.pk,
                 'text': message.text,
                 'created': message.created.isoformat(),
+                'message_id': message.pk,  # 메시지 ID도 포함
             },
         )
 
+    # async def send_message(self, event):
+    #     await self.send(text_data=json.dumps({
+    #         'user': event['user'],
+    #         'text': event['text'],
+    #         'created': event['created'],
+    #     }))
     async def send_message(self, event):
-        # 채널 레이어에서 받은 이벤트는 이미 직렬화 가능한 데이터
+        # 현재 사용자가 메시지 작성자인지 확인
+        is_mine = event['user'] == self.user.pk
+
         await self.send(text_data=json.dumps({
             'user': event['user'],
             'text': event['text'],
             'created': event['created'],
+            'isMine': is_mine,  # 추가
         }))
 
     @database_sync_to_async
