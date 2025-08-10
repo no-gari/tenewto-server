@@ -96,8 +96,6 @@ class UserNicknameUpdateSerializer(serializers.ModelSerializer):
 
 
 class ProfileImageSerializer(serializers.ModelSerializer):
-    image = serializers.FileField(required=False)
-
     class Meta:
         model = ProfileImage
         exclude = ('profile', )
@@ -114,4 +112,4 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'created_at', 'points', 'profile_image')
 
     def get_profile_image(self, obj):
-        return ProfileImageSerializer(obj.profileimage_set.all(), many=True).data
+        return ProfileImageSerializer(obj.images.all(), many=True).data

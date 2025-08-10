@@ -161,7 +161,7 @@ class Profile(models.Model):
 
 class ProfileImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name=_('uuid'))
-    profile = models.ForeignKey(Profile, default=None, on_delete=models.CASCADE, verbose_name=_('프로필'))
+    profile = models.ForeignKey(Profile, default=None, on_delete=models.CASCADE, verbose_name=_('프로필'), related_name='images')
     profile_image = models.ImageField(
         verbose_name=_('프로필 이미지'), null=True, blank=True, upload_to=FilenameChanger('profile')
     )
