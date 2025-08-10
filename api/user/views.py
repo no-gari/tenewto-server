@@ -1,8 +1,8 @@
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from api.user.models import Profile, ProfileImage
-from api.user.serializers import ProfileSerializer, UserNicknameUpdateSerializer, UserSocialLoginSerializer, \
-    UserRegisterSerializer, ProfileImageSerializer
+from api.user.serializers import ProfileSerializer, UserSocialLoginSerializer, ProfileImageSerializer, \
+    UserRegisterSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import MultiPartParser
 

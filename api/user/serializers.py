@@ -89,20 +89,15 @@ class UserSocialLoginSerializer(serializers.Serializer):
         }
 
 
-class UserNicknameUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('nickname',)
-
-
 class ProfileImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfileImage
-        exclude = ('profile', )
+        exclude = ('profile', 'is_avatar')
 
 
 class ProfileSerializer(serializers.ModelSerializer):
     profile_image = serializers.SerializerMethodField(read_only=True)
+    avatar = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Profile
@@ -112,4 +107,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'created_at', 'points', 'profile_image')
 
     def get_profile_image(self, obj):
-        return ProfileImageSerializer(obj.images.all(), many=True).data
+        return ProfileImageSerializer(obj.images.all(), many=True, context=self.context).data
+
+    def get_avatar(self, obj):
+        avatar_image = obj.images.filter(is_avatar=True).first()
+        if avatar_image:
+            avatar_image_url = ProfileImageSerializer(avatar_image, context=self.context).data.get('profile_image', None)
+            return avatar_image_url
+        return None

@@ -165,7 +165,13 @@ class ProfileImage(models.Model):
     profile_image = models.ImageField(
         verbose_name=_('프로필 이미지'), null=True, blank=True, upload_to=FilenameChanger('profile')
     )
+    is_avatar = models.BooleanField(default=False, verbose_name=_('대표 이미지'))
     created_at = models.DateTimeField(default=timezone.now, verbose_name=_('생성 시각'))
+
+    def save(self, *args, **kwargs):
+        if self.is_avatar:
+            ProfileImage.objects.filter(profile=self.profile, is_avatar=True).exclude(id=self.id).update(is_avatar=False)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         self.profile_image.delete(save=False)
