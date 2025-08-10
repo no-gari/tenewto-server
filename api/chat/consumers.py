@@ -62,12 +62,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             },
         )
 
-    # async def send_message(self, event):
-    #     await self.send(text_data=json.dumps({
-    #         'user': event['user'],
-    #         'text': event['text'],
-    #         'created': event['created'],
-    #     }))
     async def send_message(self, event):
         # 현재 사용자가 메시지 작성자인지 확인
         is_mine = event['user'] == self.user.pk
