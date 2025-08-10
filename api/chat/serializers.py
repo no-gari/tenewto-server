@@ -5,9 +5,14 @@ from api.user.models import User, Profile
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
-        fields = ['avatar', 'nickname']
+        fields = ['avatar', 'nickname', 'id']
+
+    def get_id(self, obj):
+        return obj.user.id
 
 
 class OpponentSerializer(serializers.ModelSerializer):
