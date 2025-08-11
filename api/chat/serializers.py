@@ -39,7 +39,7 @@ class ChatListSerializer(serializers.ModelSerializer):
 
 class MessageListSerializer(serializers.ModelSerializer):
     is_mine = serializers.SerializerMethodField()
-    image = serializers.ImageField(source='message_image')
+    image = serializers.SerializerMethodField()
     created = serializers.DateTimeField(
         format='%Y-%m-%d %H:%M:%S%z',
     )
@@ -50,3 +50,27 @@ class MessageListSerializer(serializers.ModelSerializer):
 
     def get_is_mine(self, obj):
         return self.context['request'].user == obj.user
+
+    def get_image(self, obj):
+        if obj.message_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.message_image.url)
+            return obj.message_image.url
+        return None
+
+
+class MessageImageCreateSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(source='message_image', write_only=True)
+    # 응답은 리스트용과 동일하게
+    id = serializers.IntegerField(read_only=True)
+    text = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    created = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = Message
+        fields = ['id', 'text', 'image', 'created']
+
+    def create(self, validated_data):
+        # view에서 chat, user를 주입
+        return Message.objects.create(**validated_data)

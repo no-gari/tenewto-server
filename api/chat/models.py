@@ -37,6 +37,3 @@ class Message(models.Model):
         verbose_name = '메세지'
         verbose_name_plural = verbose_name
         ordering = ['-created']
-
-    def __str__(self):
-        return self.text
