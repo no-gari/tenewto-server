@@ -14,9 +14,6 @@ class Chat(models.Model):
         verbose_name_plural = verbose_name
         ordering = ['-updated', '-created']
 
-    def get_last_message(self):
-        return self.message_set.first()
-
     def __str__(self):
         return f"Chat {self.id} - {self.created}"
 

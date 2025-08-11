@@ -25,7 +25,7 @@ class OpponentSerializer(serializers.ModelSerializer):
 
 class ChatListSerializer(serializers.ModelSerializer):
     opponent_set = serializers.SerializerMethodField()
-    last_message = serializers.CharField(source='get_last_message')
+    last_message = serializers.SerializerMethodField()
     updated = serializers.DateTimeField()
 
     class Meta:
@@ -35,6 +35,12 @@ class ChatListSerializer(serializers.ModelSerializer):
     def get_opponent_set(self, obj):
         opponent_set = obj.user_set.exclude(pk=self.context['request'].user.pk).first()
         return OpponentSerializer(instance=opponent_set, context=self.context).data if opponent_set else None
+
+    def get_last_message(self, obj):
+        last_msg = obj.message_set.first()
+        if not last_msg:
+            return None
+        return last_msg.text or '사진'
 
 
 class MessageListSerializer(serializers.ModelSerializer):
