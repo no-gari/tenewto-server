@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from api.chat.permissions import IsChatOwner
+from api.notification.fcm import send_push
 
 
 class ChatListView(ListAPIView):
@@ -46,6 +47,20 @@ class MessageImageCreateView(APIView):
 
         message = serializer.save(chat=chat, user=request.user)
         chat.save()  # updated 갱신
+
+        recipients = chat.user_set.exclude(id=request.user.id).values_list(
+            "profile__firebase_token", flat=True
+        )
+        title = getattr(request.user.profile, "nickname", request.user.email)
+        body = message.text or "이미지가 도착했습니다"
+        for token in recipients:
+            if token:
+                send_push(
+                    token,
+                    title,
+                    body,
+                    {"chat_id": str(chat.id), "message_id": str(message.id)},
+                )
 
         # 응답 직렬화
         out = MessageListSerializer(message, context={'request': request}).data
