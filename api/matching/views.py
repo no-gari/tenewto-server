@@ -8,6 +8,7 @@ from .serializers import MatchSerializer, LikeSerializer, LikeResponseSerializer
 from api.user.models import Profile
 from api.user.serializers import ProfileSerializer
 from api.chat.models import Chat
+from api.notification.fcm import send_push
 
 
 class BlockViewSet(viewsets.ModelViewSet):
@@ -77,30 +78,54 @@ class LikeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """좋아요 생성 시 자동으로 from_user 설정 및 매칭 확인"""
         like = serializer.save(from_user=self.request.user)
-        
+
+        # 알림: 새 좋아요
+        token = getattr(like.to_user.profile, "firebase_token", None)
+        if token:
+            sender_name = getattr(self.request.user.profile, "nickname", self.request.user.email)
+            send_push(
+                token,
+                "새 좋아요",
+                f"{sender_name}님이 당신을 좋아합니다.",
+                {"from_user": str(self.request.user.id)},
+            )
+
         # 상대방이 나를 좋아했는지 확인
         mutual_like = Like.objects.filter(
             from_user=like.to_user,
             to_user=like.from_user,
             status='pending'
         ).first()
-        
+
         if mutual_like:
             # 양방향 좋아요이므로 매칭 생성
             match = Match.objects.create(
                 user1=like.from_user,
                 user2=like.to_user
             )
-            
+
             # 두 좋아요 모두 accepted로 변경
             like.status = 'accepted'
             mutual_like.status = 'accepted'
             like.save()
             mutual_like.save()
-            
+
             # 채팅방 자동 생성
             chat = Chat.objects.create(match=match)
             chat.user_set.add(match.user1, match.user2)
+
+            # 알림: 매칭 성사
+            for user in (match.user1, match.user2):
+                token = getattr(user.profile, "firebase_token", None)
+                if token:
+                    other = match.user2 if user == match.user1 else match.user1
+                    other_name = getattr(other.profile, "nickname", other.email)
+                    send_push(
+                        token,
+                        "매칭 성사",
+                        f"{other_name}님과 매칭되었어요!",
+                        {"match_id": str(match.id)},
+                    )
 
     @action(detail=False, methods=['get'])
     def received(self, request):
@@ -130,7 +155,7 @@ class LikeViewSet(viewsets.ModelViewSet):
         serializer = LikeResponseSerializer(data=request.data)
         if serializer.is_valid():
             action = serializer.validated_data['action']
-            
+
             if action == 'accept':
                 # 좋아요 수락
                 like.status = 'accepted'
@@ -144,6 +169,19 @@ class LikeViewSet(viewsets.ModelViewSet):
                 # 채팅방 생성
                 chat = Chat.objects.create(match=match)
                 chat.user_set.add(match.user1, match.user2)
+
+                # 알림: 매칭 성사
+                for user in (match.user1, match.user2):
+                    token = getattr(user.profile, "firebase_token", None)
+                    if token:
+                        other = match.user2 if user == match.user1 else match.user1
+                        other_name = getattr(other.profile, "nickname", other.email)
+                        send_push(
+                            token,
+                            "매칭 성사",
+                            f"{other_name}님과 매칭되었어요!",
+                            {"match_id": str(match.id)},
+                        )
 
                 return Response({
                     'status': 'matched',
@@ -287,5 +325,5 @@ class RecommendViewSet(viewsets.ViewSet):
         #     ).filter(
         #         distance__lte=float(max_distance) * 1000  # km를 m로 변환
         #     ).order_by('distance')
-        
+
         return queryset

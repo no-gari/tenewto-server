@@ -3,6 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from api.chat.models import Message, Chat
 from django.db import transaction
+from api.notification.fcm import send_push
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -74,4 +75,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             text=text,
         )
         self.chat.save()
+
+        recipients = self.chat.user_set.exclude(id=self.user.id).values_list(
+            "profile__firebase_token", flat=True
+        )
+        title = getattr(self.user.profile, "nickname", self.user.email)
+        for token in recipients:
+            if token:
+                send_push(
+                    token,
+                    title,
+                    text,
+                    {"chat_id": str(self.chat.id)},
+                )
+
         return message
