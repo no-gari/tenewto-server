@@ -19,6 +19,8 @@ class Product(models.Model):
 
     class Meta:
         unique_together = ('store', 'product_id', 'environment')
+        verbose_name = '상품'
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return f"{self.store}:{self.product_id}"
@@ -42,6 +44,8 @@ class Purchase(models.Model):
         indexes = [
             models.Index(fields=['store', 'transaction_id']),
         ]
+        verbose_name = '구매'
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return f"{self.user_id}:{self.transaction_id}"
@@ -55,6 +59,8 @@ class Entitlement(models.Model):
 
     class Meta:
         unique_together = ('user', 'feature')
+        verbose_name = '권한'
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return f"{self.user_id}:{self.feature}={self.balance}"
@@ -80,3 +86,7 @@ class PurchaseEvent(models.Model):
 
     def __str__(self):
         return f"{self.purchase_id}:{self.event_type}"
+
+    class Meta:
+        verbose_name = '구매 내역'
+        verbose_name_plural = verbose_name

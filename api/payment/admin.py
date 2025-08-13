@@ -17,6 +17,6 @@ class PurchaseEventAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(Product)
+@admin.register(Entitlement)
 class EntitlementAdmin(admin.ModelAdmin):
     pass

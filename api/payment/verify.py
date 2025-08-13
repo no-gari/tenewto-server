@@ -9,6 +9,8 @@ from googleapiclient.discovery import build
 # ------------------------------
 # iOS 결제 검증 (App Store Server API)
 # ------------------------------
+
+
 def _generate_apple_jwt():
     """Apple API 호출용 JWT 생성"""
     headers = {

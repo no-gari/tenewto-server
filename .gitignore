@@ -9,6 +9,9 @@ __pycache__/
 # Docker env
 .env
 
+/media
+/
+
 # C extensions
 *.so
 
