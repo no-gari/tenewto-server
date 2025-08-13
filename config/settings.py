@@ -29,6 +29,7 @@ LOCAL_APPS = [
     'api.logger.apps.LoggerConfig',
     'api.matching.apps.MatchingConfig',
     'api.notification.apps.NotificationConfig',
+    'api.payment.apps.PaymentConfig',
 ]
 
 # OTHER LIBRARIES
