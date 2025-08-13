@@ -213,3 +213,14 @@ MAX_UPLOAD_SIZE = 104857600
 DATA_UPLOAD_MAX_MEMORY_SIZE = None
 FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600
 DATA_UPLOAD_MAX_NUMBER_FIELDS = None
+
+# Google Play API 설정
+GOOGLE_SERVICE_ACCOUNT_FILE = BASE_DIR / 'keys/google_service_account.json'  # 서비스 계정 키 파일 경로
+GOOGLE_PACKAGE_NAME = 'com.yourcompany.yourapp'  # Google Play 앱 패키지명
+
+# Apple App Store API 설정
+APPLE_ISSUER_ID = '...'        # App Store Connect → Users and Access → Keys → Issuer ID
+APPLE_KEY_ID = '...'           # 위와 동일한 위치에서 Key ID 확인
+APPLE_PRIVATE_KEY = """-----BEGIN PRIVATE KEY-----
+...YOUR PRIVATE KEY CONTENT...
+-----END PRIVATE KEY-----"""   # App Store Connect에서 받은 p8 키 내용

@@ -3,38 +3,24 @@ from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-
 from .models import Product, Purchase, Entitlement, PurchaseEvent
 from .serializers import PurchaseSerializer, EntitlementSerializer
-
-
-# Placeholder verification helpers. Real implementation should call Apple/Google APIs.
-def verify_ios_transaction(token: str) -> dict:
-    return {
-        'product_id': 'credit_10',
-        'transaction_id': token,
-        'environment': 'sandbox',
-        'type': Product.Type.CONSUMABLE,
-    }
-
-
-def verify_android_purchase(token: str) -> dict:
-    return {
-        'product_id': 'credit_10',
-        'transaction_id': token,
-        'environment': 'sandbox',
-        'type': Product.Type.CONSUMABLE,
-    }
+from .verify import verify_android_purchase, verify_ios_transaction
 
 
 class IOSVerifyView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        token = request.data.get('transaction_jws')
-        if not token:
-            return Response({'detail': 'transaction_jws required'}, status=400)
-        data = verify_ios_transaction(token)
+        transaction_id = request.data.get('transaction_id')
+        if not transaction_id:
+            return Response({'detail': 'transaction_id required'}, status=400)
+
+        try:
+            data = verify_ios_transaction(transaction_id)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=400)
+
         with transaction.atomic():
             product, _ = Product.objects.get_or_create(
                 store=Product.Store.IOS,
@@ -60,6 +46,7 @@ class IOSVerifyView(APIView):
                 ent.balance += 1
                 ent.last_purchase = purchase
                 ent.save()
+
             PurchaseEvent.objects.create(
                 purchase=purchase,
                 event_type=PurchaseEvent.EventType.BUY,
@@ -73,10 +60,16 @@ class AndroidVerifyView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        token = request.data.get('purchase_token')
-        if not token:
-            return Response({'detail': 'purchase_token required'}, status=400)
-        data = verify_android_purchase(token)
+        purchase_token = request.data.get('purchase_token')
+        product_id = request.data.get('product_id')
+        if not purchase_token or not product_id:
+            return Response({'detail': 'purchase_token and product_id required'}, status=400)
+
+        try:
+            data = verify_android_purchase(purchase_token, product_id)
+        except Exception as e:
+            return Response({'detail': str(e)}, status=400)
+
         with transaction.atomic():
             product, _ = Product.objects.get_or_create(
                 store=Product.Store.ANDROID,
@@ -102,6 +95,7 @@ class AndroidVerifyView(APIView):
                 ent.balance += 1
                 ent.last_purchase = purchase
                 ent.save()
+
             PurchaseEvent.objects.create(
                 purchase=purchase,
                 event_type=PurchaseEvent.EventType.BUY,
