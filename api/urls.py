@@ -5,5 +5,4 @@ urlpatterns = [
     path('notification/', include('api.notification.urls')),
     path('matching/', include('api.matching.urls')),
     path('chat/', include('api.chat.urls')),
-    path('payment/', include('api.payment.urls')),
 ]
