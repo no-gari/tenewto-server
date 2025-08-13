@@ -27,7 +27,6 @@ LOCAL_APPS = [
     'api.user.apps.UserConfig',
     'api.chat.apps.ChatConfig',
     'api.logger.apps.LoggerConfig',
-    'api.payment.apps.PaymentConfig',
     'api.matching.apps.MatchingConfig',
     'api.notification.apps.NotificationConfig',
 ]
