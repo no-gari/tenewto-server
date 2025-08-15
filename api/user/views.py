@@ -4,7 +4,7 @@ from api.user.models import Profile, ProfileImage
 from api.user.serializers import ProfileSerializer, UserSocialLoginSerializer, ProfileImageSerializer, \
     UserRegisterSerializer
 from rest_framework.exceptions import ValidationError
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, FormParser
 
 
 class UserRegisterView(CreateAPIView):
@@ -26,7 +26,7 @@ class ProfileDetailUpdateView(RetrieveUpdateAPIView):
 class ProfileImageUploadView(CreateAPIView):
     serializer_class = ProfileImageSerializer
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser]
+    parser_classes = (MultiPartParser, FormParser)
 
     def perform_create(self, serializer):
         profile = self.request.user.profile

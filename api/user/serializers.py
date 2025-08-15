@@ -92,8 +92,7 @@ class UserSocialLoginSerializer(serializers.Serializer):
 class ProfileImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfileImage
-        exclude = ('profile', 'is_avatar')
-
+        exclude = ('profile', )
 
 class ProfileSerializer(serializers.ModelSerializer):
     profile_image = serializers.SerializerMethodField(read_only=True)
