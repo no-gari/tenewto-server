@@ -94,6 +94,7 @@ class ProfileImageSerializer(serializers.ModelSerializer):
         model = ProfileImage
         exclude = ('profile', )
 
+
 class ProfileSerializer(serializers.ModelSerializer):
     profile_image = serializers.SerializerMethodField(read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)

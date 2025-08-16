@@ -55,8 +55,6 @@ class ProfileImageUploadView(CreateAPIView):
 
     def perform_create(self, serializer):
         profile = self.request.user.profile
-        if profile.images.count() >= 3:
-            raise ValidationError("이미지는 최대 3장까지 업로드할 수 있습니다.")
 
         # 일단 저장
         obj = serializer.save(profile=profile)
