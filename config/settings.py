@@ -120,7 +120,7 @@ else:
     }
 
 # S3
-USE_S3 = False
+USE_S3 = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 MEDIA_URL = '/media/'
