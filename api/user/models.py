@@ -86,7 +86,8 @@ class Hobby(models.Model):
 class Profile(models.Model):
     GENDER_CHOICES = Choices(
         ("M", "남성"),
-        ("W", "여성"),
+        ("MTF", "트랜스여성(MTF)"),
+        ("CD", "크로스드레서"),
     )
     RELIGION_CHOICES = Choices(
         ('noreligion', '무교'),
@@ -129,7 +130,7 @@ class Profile(models.Model):
     gender = models.CharField(
         choices=GENDER_CHOICES,
         default=GENDER_CHOICES.M,
-        max_length=1,
+        max_length=5,
         verbose_name=_('성별')
     )
     religion = models.CharField(max_length=32, choices=RELIGION_CHOICES, default='other', verbose_name=_('종교'))
